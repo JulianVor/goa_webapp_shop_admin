@@ -3,7 +3,7 @@ services:
     build: .
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://${MEDUSA_DB_USER:-medusa}:${MEDUSA_DB_PASSWORD:-change-me}@${MEDUSA_DB_HOST:-db}:5432/${MEDUSA_DB_NAME:-medusa_shop}
+      DATABASE_URL: postgres://${MEDUSA_DB_USER:-life_webapp_shop_admin}:${MEDUSA_DB_PASSWORD:-change-me}@${MEDUSA_DB_HOST:-db}:5432/${MEDUSA_DB_NAME:-life_webapp_shop_admin}
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-change-me}
       COOKIE_SECRET: ${COOKIE_SECRET:-change-me}
