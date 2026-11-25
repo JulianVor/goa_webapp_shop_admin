@@ -48,9 +48,15 @@ Dashboard löschen/durch echte ersetzen.
 
 ## Deployment
 
-`docker-compose.yml` geht von einem gemeinsamen Docker-Netzwerk mit goa_webapp und Caddy
-aus (siehe `.env.example`, `SHARED_NETWORK_NAME` anpassen). Redis läuft als eigener
-Container nur für dieses Projekt - goa_webapp nutzt keines.
+`docker-compose.yml` geht von **zwei unterschiedlichen** Docker-Netzwerken aus - Caddys
+Netzwerk und das Netzwerk, auf dem goa_webapps Postgres-Container sitzt, sind auf dem
+Server i.d.R. NICHT dasselbe (siehe `.env.example` für die Discovery-Befehle und
+`goa_webapp_shop`s README für Details - `PROXY_NETWORK_NAME`/`DB_NETWORK_NAME` sind in
+beiden Projekten dieselben Werte). `MEDUSA_DB_HOST` ist der **Containername** des
+Postgres-Containers (z.B. `life_webapp-db-1`), keine Compose-Service-Alias. Redis läuft
+als eigener Container nur für dieses Projekt, auf einem eigenen `internal`-Netzwerk -
+goa_webapp nutzt kein Redis und Redis ist von außerhalb dieses Compose-Projekts nicht
+erreichbar.
 
 Migrationen laufen nicht automatisch bei jedem Start (vermeidet parallele
 Migrationsläufe bei mehreren Replikas) - einmalig nach jedem Deploy mit neuen

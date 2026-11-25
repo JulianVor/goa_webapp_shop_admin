@@ -13,21 +13,31 @@ services:
     ports:
       - "${MEDUSA_PORT:-9000}:9000"
     networks:
-      - shared
+      - proxy
+      - db-net
+      - internal
     depends_on:
       - redis
 
   # Only this app's own event bus/workflow/cache - not shared with goa_webapp, which
-  # doesn't use Redis at all.
+  # doesn't use Redis at all. Kept off the proxy/db networks entirely - nothing outside
+  # this compose project needs to reach it.
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     networks:
-      - shared
+      - internal
 
 networks:
-  # Same shared network as goa_webapp_shop's docker-compose.yml - see its README for
-  # how to find the real name on your server.
-  shared:
+  # Caddy's own network - lets Caddy reach this container by its service name ("medusa").
+  # Find the real name the same way as in goa_webapp_shop's docker-compose.yml.
+  proxy:
     external: true
-    name: ${SHARED_NETWORK_NAME:-fotosvorju-proxy}
+    name: ${PROXY_NETWORK_NAME:-fotosvorju-proxy}
+  # The network goa_webapp's own containers (app + Postgres) sit on - lets this app reach
+  # the shared Postgres container by name (MEDUSA_DB_HOST, e.g. "life_webapp-db-1").
+  db-net:
+    external: true
+    name: ${DB_NETWORK_NAME:-life_webapp_default}
+  # Plain internal network for medusa <-> redis - Compose creates this one itself.
+  internal: {}
