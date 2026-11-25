@@ -1,0 +1,33 @@
+services:
+  medusa:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${MEDUSA_DB_USER:-medusa}:${MEDUSA_DB_PASSWORD:-change-me}@${MEDUSA_DB_HOST:-db}:5432/${MEDUSA_DB_NAME:-medusa_shop}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      COOKIE_SECRET: ${COOKIE_SECRET:-change-me}
+      STORE_CORS: ${STORE_CORS:-https://shop.heimfeld.life}
+      ADMIN_CORS: ${ADMIN_CORS:-https://shop-admin.heimfeld.life}
+      AUTH_CORS: ${AUTH_CORS:-https://shop-admin.heimfeld.life}
+    ports:
+      - "${MEDUSA_PORT:-9000}:9000"
+    networks:
+      - shared
+    depends_on:
+      - redis
+
+  # Only this app's own event bus/workflow/cache - not shared with goa_webapp, which
+  # doesn't use Redis at all.
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - shared
+
+networks:
+  # Same shared network as goa_webapp_shop's docker-compose.yml - see its README for
+  # how to find the real name on your server.
+  shared:
+    external: true
+    name: ${SHARED_NETWORK_NAME:-fotosvorju-proxy}
