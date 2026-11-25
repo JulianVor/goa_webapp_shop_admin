@@ -3,7 +3,11 @@ services:
     build: .
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://${MEDUSA_DB_USER:-life_webapp_shop_admin}:${MEDUSA_DB_PASSWORD:-change-me}@${MEDUSA_DB_HOST:-db}:5432/${MEDUSA_DB_NAME:-life_webapp_shop_admin}
+      # sslmode=disable is required: without it, Medusa's database-config loader treats any
+      # non-localhost host as "remote" and forces an SSL connection attempt by default
+      # (see @medusajs/utils load-module-database-config.js), which hangs indefinitely
+      # against a Postgres server that has SSL turned off instead of cleanly failing/falling back.
+      DATABASE_URL: postgres://${MEDUSA_DB_USER:-life_webapp_shop_admin}:${MEDUSA_DB_PASSWORD:-change-me}@${MEDUSA_DB_HOST:-db}:5432/${MEDUSA_DB_NAME:-life_webapp_shop_admin}?sslmode=disable
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-change-me}
       COOKIE_SECRET: ${COOKIE_SECRET:-change-me}
