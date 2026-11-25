@@ -79,6 +79,40 @@ Das Admin Dashboard ist dann unter `shop-admin.heimfeld.life/app` erreichbar - d
 geht als `MEDUSA_ADMIN_URL` in goa_webapp_shop, für den "Produkte verwalten"-Link in
 dessen eigenem (kleinen) Admin-Bereich.
 
+### Troubleshooting Ersteinrichtung/Neuaufsetzen
+
+Stolperfallen, die beim ersten Deploy aufgetreten sind - für den nächsten Server/Restart:
+
+- **Datenbank/User auf dem gemeinsamen Postgres-Container anlegen**: Der echte Superuser
+  und die Standard-Datenbank des bestehenden Postgres-Containers müssen vorher ermittelt
+  werden, nicht geraten (`goa`/`postgres` passen nicht überall):
+  ```bash
+  docker exec -it <postgres-container> env | grep -E 'POSTGRES_USER|POSTGRES_DB'
+  ```
+  `psql -U <user>` ohne `-d` verbindet sich sonst zu einer Datenbank, die denselben Namen
+  wie der User hat - gibt's die nicht, schlägt schon die Verbindung fehl. Immer explizit
+  `-d <POSTGRES_DB-Wert>` angeben.
+- **`CREATE USER` und `CREATE DATABASE` NIE in einem gemeinsamen `-c`-Aufruf**: Mehrere
+  durch `;` getrennte Anweisungen in einem `-c` laufen implizit in einer Transaktion, und
+  `CREATE DATABASE` darf nicht in einer Transaktion laufen ("cannot run inside a
+  transaction block") - der Fehler rollt dann auch den vorher erfolgreichen `CREATE USER`
+  zurück. Immer zwei getrennte `psql -c`-Aufrufe.
+- **`ts-node cannot be loaded`-Meldung beim Start**: harmlose Warnung (Medusas CLI prüft
+  beim Boot, ob der Dev-Modus verfügbar ist), kein Fehler - ignorieren.
+- **`db:migrate` hängt ~10s und bricht mit "Could not connect to the database ... SSL
+  configuration issue" ab**, obwohl `psql` mit derselben `DATABASE_URL` sofort
+  funktioniert: `docker-compose.yml` hängt deshalb schon `?sslmode=disable` an die
+  `DATABASE_URL` an. Ohne dieses Flag behandelt Medusas DB-Config-Loader jeden
+  Nicht-`localhost`-Host als "remote" und versucht standardmäßig SSL - das hängt sich
+  gegen unseren Postgres-Container (der `ssl = off` hat) komplett auf, statt sauber
+  zurückzufallen. Falls `MEDUSA_DB_HOST` mal manuell/anders gesetzt wird (z.B. für einen
+  Einzel-Testbefehl außerhalb von Compose), `?sslmode=disable` nicht vergessen.
+- **`redisUrl not found. A fake redis instance will be used.`**: `medusa-config.ts` liest
+  `REDIS_URL` explizit in `projectConfig.redisUrl` - falls diese Zeile mal fehlt (z.B.
+  nach einem Merge-Konflikt), läuft Medusa klaglos mit In-Memory-Event-Bus/-Locking
+  weiter, was für mehrere Replikas/Neustarts nicht geeignet ist. Im Zweifel in den Logs
+  direkt nach dem Start prüfen, dass diese Meldung NICHT mehr auftaucht.
+
 ## Offene Punkte
 
 - **Zahlung**: Noch kein Payment-Provider konfiguriert (z.B. das offizielle
