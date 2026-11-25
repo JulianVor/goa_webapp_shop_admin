@@ -14,6 +14,11 @@ services:
       STORE_CORS: ${STORE_CORS:-https://shop.heimfeld.life}
       ADMIN_CORS: ${ADMIN_CORS:-https://shop-admin.heimfeld.life}
       AUTH_CORS: ${AUTH_CORS:-https://shop-admin.heimfeld.life}
+      # Public URL this backend is reachable at - used for the Admin Dashboard's own API
+      # calls AND, critically, to build the public URL of uploaded files (product images).
+      # Without it, uploaded file URLs default to "http://localhost:9000/static/...",
+      # which never resolves for an actual browser (see medusa-config.ts).
+      MEDUSA_BACKEND_URL: ${MEDUSA_BACKEND_URL:-https://shop-admin.heimfeld.life}
     ports:
       - "${MEDUSA_PORT:-9000}:9000"
     networks:

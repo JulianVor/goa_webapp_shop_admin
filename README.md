@@ -112,6 +112,17 @@ Stolperfallen, die beim ersten Deploy aufgetreten sind - für den nächsten Serv
   nach einem Merge-Konflikt), läuft Medusa klaglos mit In-Memory-Event-Bus/-Locking
   weiter, was für mehrere Replikas/Neustarts nicht geeignet ist. Im Zweifel in den Logs
   direkt nach dem Start prüfen, dass diese Meldung NICHT mehr auftaucht.
+- **Produktbilder werden hochgeladen, erscheinen aber nirgends - nicht mal in der Admin
+  Dashboard-Vorschau selbst**: Der lokale Datei-Provider (`@medusajs/file-local`) baut
+  die öffentliche URL eines Uploads standardmäßig als `http://localhost:9000/static/...`
+  - das "localhost" ist dabei der Rechner, auf dem gerade der Browser läuft, nicht der
+  Server, und ist daher für niemanden außer whoever zufällig selbst etwas auf Port 9000
+  laufen hat erreichbar. Fix: `MEDUSA_BACKEND_URL` setzen (siehe `.env.example`) - wird in
+  `medusa-config.ts` als `backend_url`-Option an den File-Provider durchgereicht. **Wichtig:
+  Bereits hochgeladene Bilder mit der alten, kaputten URL bleiben kaputt** (die URL wird
+  beim Upload fest in der Datenbank gespeichert, nicht bei jedem Abruf neu gebaut) - nach
+  dem Fix und Neustart müssen betroffene Produktbilder im Admin Dashboard einmal neu
+  hochgeladen werden.
 
 ## Offene Punkte
 
