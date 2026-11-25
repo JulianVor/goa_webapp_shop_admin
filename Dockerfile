@@ -1,5 +1,7 @@
 # --- Build stage ---------------------------------------------------------
-FROM node:20-alpine AS build
+# Node 22.15+ required - some transitive deps (e.g. @whatwg-node/promise-helpers) enforce
+# it via "engines" and fail "yarn install" on Node 20.
+FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY . .
@@ -9,7 +11,7 @@ RUN yarn build
 # --- Runtime stage ---------------------------------------------------------
 # "medusa build" produces a self-contained deployable app under .medusa/server,
 # with its own package.json - only that directory ships in the final image.
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 WORKDIR /app
 
 COPY --from=build /app/.medusa/server .
