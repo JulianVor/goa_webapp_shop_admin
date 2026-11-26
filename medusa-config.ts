@@ -37,5 +37,23 @@ module.exports = defineConfig({
         ],
       },
     },
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          {
+            // Registered provider id ends up as "pp_stripe_stripe" (Stripe's own
+            // identifier "stripe" + this "id: stripe") - goa_webapp_shop's
+            // APP_STRIPE_PROVIDER_ID must match this exactly.
+            resolve: "@medusajs/medusa/payment-stripe",
+            id: "stripe",
+            options: {
+              apiKey: process.env.STRIPE_API_KEY,
+              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+            },
+          },
+        ],
+      },
+    },
   ],
 })

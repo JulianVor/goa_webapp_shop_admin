@@ -19,6 +19,14 @@ services:
       # Without it, uploaded file URLs default to "http://localhost:9000/static/...",
       # which never resolves for an actual browser (see medusa-config.ts).
       MEDUSA_BACKEND_URL: ${MEDUSA_BACKEND_URL:-https://shop-admin.heimfeld.life}
+      # Secret key (sk_...) - from the Stripe Dashboard, Developers > API keys. Required for
+      # the Stripe payment provider (medusa-config.ts) - without it Medusa fails to start.
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      # From the Stripe Dashboard webhook endpoint you create for
+      # https://<this-domain>/hooks/payment/stripe_stripe (signing secret, whsec_...) - see
+      # README for which events to select. Without it, Stripe webhook events are rejected and
+      # orders never get marked paid after checkout.
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     ports:
       - "${MEDUSA_PORT:-9000}:9000"
     networks:
