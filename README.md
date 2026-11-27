@@ -124,10 +124,20 @@ Stolperfallen, die beim ersten Deploy aufgetreten sind - für den nächsten Serv
   dem Fix und Neustart müssen betroffene Produktbilder im Admin Dashboard einmal neu
   hochgeladen werden.
 
+## Zahlung (Stripe)
+
+`@medusajs/payment-stripe` ist in `medusa-config.ts` konfiguriert (`STRIPE_API_KEY`/
+`STRIPE_WEBHOOK_SECRET` aus der `.env`) - siehe auch goa_webapp_shop's README für den
+Checkout-seitigen Teil (Publishable Key, Payment Element).
+
+`capture: true` ist gesetzt, damit eine autorisierte Zahlung automatisch eingezogen wird
+(Stripes `capture_method: "automatic"`), statt in Stripe als "Nicht erfasst"/"requires_capture"
+hängen zu bleiben, bis jemand sie im Medusa Admin manuell unter Orders → Bestellung →
+Payments → "Capture Payment" bestätigt. Das wirkt sich **nicht rückwirkend** auf schon
+autorisierte, noch nicht erfasste Zahlungen aus - die müssen einmalig manuell im Medusa
+Admin erfasst werden.
+
 ## Offene Punkte
 
-- **Zahlung**: Noch kein Payment-Provider konfiguriert (z.B. das offizielle
-  `@medusajs/payment-stripe`-Plugin) - dafür wird ein echtes Stripe-Konto gebraucht.
-  Siehe auch goa_webapp_shop's README (`/kasse`-Platzhalter).
 - Admin-Login ist komplett unabhängig von goa_webapp's/goa_webapp_shop's eigenem Login -
   kein SSO, bewusst getrennt.

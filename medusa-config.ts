@@ -50,6 +50,12 @@ module.exports = defineConfig({
             options: {
               apiKey: process.env.STRIPE_API_KEY,
               webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+              // Without this, Stripe only authorizes the charge ("requires_capture") and
+              // leaves it to someone to manually hit "Capture Payment" per order in the
+              // Medusa Admin - verified against node_modules/@medusajs/payment-stripe's
+              // actual source: `capture: true` is what sets the PaymentIntent's
+              // capture_method to "automatic" instead of "manual".
+              capture: true,
             },
           },
         ],
